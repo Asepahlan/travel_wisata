@@ -29,8 +29,26 @@ define('ADMIN_PHONE', '+' . WHATSAPP_NUMBER);
 // Set default timezone
 date_default_timezone_set(timezone);
 
-// Mulai session
-session_start();
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    // Set secure session parameters
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.use_only_cookies', 1);
+    ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on');
+    
+    // Start the session
+    session_start();
+    
+    // Regenerate session ID to prevent session fixation
+    if (!isset($_SESSION['last_regeneration'])) {
+        session_regenerate_id(true);
+        $_SESSION['last_regeneration'] = time();
+    } else if (time() - $_SESSION['last_regeneration'] > 1800) {
+        // Regenerate session ID every 30 minutes
+        session_regenerate_id(true);
+        $_SESSION['last_regeneration'] = time();
+    }
+}
 
 // Include database connection
 require_once __DIR__ . '/database.php';

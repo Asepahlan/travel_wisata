@@ -1,5 +1,6 @@
 <?php
 require_once '../config/config.php';
+require_once '../config/database.php';
 
 // Redirect jika sudah login
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
@@ -11,36 +12,74 @@ $error = '';
 
 // Proses login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
+    $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     
+    // Basic validation
     if (empty($username) || empty($password)) {
         $error = 'Username dan password harus diisi';
     } else {
         try {
-            $stmt = $pdo->prepare("SELECT * FROM admin WHERE username = ?");
-            $stmt->execute([$username]);
-            $admin = $stmt->fetch();
+            // Add error logging for debugging
+            error_log("Login attempt for username: " . $username);
             
-            if ($admin && password_verify($password, $admin['password'])) {
-                // Login berhasil
-                $_SESSION['admin_logged_in'] = true;
-                $_SESSION['admin_id'] = $admin['id'];
-                $_SESSION['admin_username'] = $admin['username'];
-                $_SESSION['admin_nama'] = $admin['fullname'];
+            // Use PDO with error mode exception
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            $stmt = $pdo->prepare("SELECT * FROM admin WHERE username = :username LIMIT 1");
+            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+            $stmt->execute();
+            $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($admin) {
+                // Debug log
+                error_log("User found. Verifying password...");
                 
-                // Update last login
-                $pdo->prepare("UPDATE admin SET last_login = NOW() WHERE id = ?")->execute([$admin['id']]);
-                
-                // Redirect ke halaman admin
-                header('Location: index.php');
-                exit();
+                if (password_verify($password, $admin['password'])) {
+                    // Login berhasil
+                    session_regenerate_id(true); // Prevent session fixation
+                    
+                    $_SESSION['admin_logged_in'] = true;
+                    $_SESSION['admin_id'] = $admin['id'];
+                    $_SESSION['admin_username'] = $admin['username'];
+                    $_SESSION['admin_nama'] = $admin['fullname'];
+                    $_SESSION['last_activity'] = time();
+                    
+                    try {
+                        // Update last login
+                        $updateStmt = $pdo->prepare("UPDATE admin SET last_login = NOW() WHERE id = :id");
+                        $updateStmt->bindParam(':id', $admin['id'], PDO::PARAM_INT);
+                        $updateStmt->execute();
+                        
+                        // Debug log
+                        error_log("Login successful for user: " . $username);
+                        
+                        // Redirect ke halaman admin
+                        header('Location: index.php');
+                        exit();
+                    } catch (PDOException $e) {
+                        error_log("Error updating last login: " . $e->getMessage());
+                        // Continue with login even if update fails
+                        header('Location: index.php');
+                        exit();
+                    }
+                } else {
+                    // Log failed login attempt
+                    error_log("Login failed: Invalid password for username: " . $username);
+                    $error = 'Username atau password salah';
+                }
             } else {
+                // Log failed login attempt
+                error_log("Login failed: User not found - " . $username);
                 $error = 'Username atau password salah';
             }
         } catch (PDOException $e) {
+            // Log the actual error for debugging
+            $errorMsg = 'Database error: ' . $e->getMessage();
+            error_log($errorMsg);
+            
+            // Show generic error to user
             $error = 'Terjadi kesalahan. Silakan coba lagi nanti.';
-            error_log($e->getMessage());
         }
     }
 }

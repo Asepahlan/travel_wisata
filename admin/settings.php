@@ -13,9 +13,77 @@ $page_title = 'Pengaturan Sistem';
 $success = '';
 $error = '';
 
+// Ambil data admin saat ini
+$admin_id = $_SESSION['admin_id'] ?? 0;
+$current_admin = [
+    'username' => '',
+    'fullname' => '',
+    'email' => '',
+    'phone' => ''
+];
+
+if ($admin_id) {
+    $stmt = $pdo->prepare("SELECT username, fullname, email, phone FROM admin WHERE id = ?");
+    $stmt->execute([$admin_id]);
+    $admin_data = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($admin_data) {
+        $current_admin = array_merge($current_admin, $admin_data);
+    }
+}
+
 // Tangani form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
+        // Update akun admin
+        if (isset($_POST['update_admin'])) {
+            // Validasi input
+            $fullname = trim($_POST['fullname']);
+            $email = trim($_POST['email']);
+            $current_password = $_POST['current_password'] ?? '';
+            $new_password = $_POST['new_password'] ?? '';
+            
+            // Validasi nama lengkap
+            if (empty($fullname)) {
+                throw new Exception("Nama lengkap tidak boleh kosong");
+            }
+            
+            // Validasi email
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new Exception("Format email tidak valid");
+            }
+            
+            // Jika ada password baru, validasi
+            if (!empty($new_password)) {
+                if (strlen($new_password) < 8) {
+                    throw new Exception("Password minimal 8 karakter");
+                }
+                
+                // Verifikasi password saat ini
+                $stmt = $pdo->prepare("SELECT password FROM admin WHERE id = ?");
+                $stmt->execute([$_SESSION['admin_id']]);
+                $admin = $stmt->fetch();
+                
+                if (!$admin || !password_verify($current_password, $admin['password'])) {
+                    throw new Exception("Password saat ini tidak valid");
+                }
+                
+                // Update password
+                $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+                $stmt = $pdo->prepare("UPDATE admin SET password = ? WHERE id = ?");
+                $stmt->execute([$hashed_password, $_SESSION['admin_id']]);
+            }
+            
+            // Update data admin
+            $stmt = $pdo->prepare("UPDATE admin SET fullname = ?, email = ? WHERE id = ?");
+            $stmt->execute([$fullname, $email, $_SESSION['admin_id']]);
+            
+            // Update session
+            $_SESSION['admin_nama'] = $fullname;
+            $_SESSION['admin_email'] = $email;
+            
+            $success = 'Profil admin berhasil diperbarui';
+        }
+        
         // Update pengaturan umum
         if (isset($_POST['update_general'])) {
             $settings = [
@@ -334,58 +402,138 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                     </div>
 
                     <!-- Tab 2: Admin Account -->
-
-                    <!-- Tab 2: Admin Account -->
                     <div id="admin" class="tab-content">
                         <div class="mb-8">
                             <h3 class="text-2xl font-semibold text-gray-900">Kelola Akun Admin</h3>
                             <p class="text-sm text-gray-500 mt-1">Kelola informasi akun dan keamanan</p>
                         </div>
+                        
                         <form method="post" class="space-y-6">
-                            <div class="bg-blue-50 p-4 rounded-lg mb-6">
-                                <h4 class="text-sm font-medium text-blue-800">Informasi Akun</h4>
-                                <p class="mt-1 text-sm text-blue-700">Kelola informasi akun admin Anda di sini.</p>
-                            </div>
+                            <!-- Account Information Card -->
+                            <div class="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
+                                <div class="px-6 py-5 border-b border-gray-200 bg-gray-50">
+                                    <h4 class="text-lg font-medium text-gray-900 flex items-center">
+                                        <i class="fas fa-user-shield text-blue-600 mr-2"></i>
+                                        Informasi Akun
+                                    </h4>
+                                    <p class="mt-1 text-sm text-gray-500">Kelola informasi akun admin Anda</p>
+                                </div>
+                                <div class="px-6 py-6 space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Username Field -->
+                                        <div class="space-y-1">
+                                            <label for="username" class="block text-sm font-medium text-gray-700">
+                                                <i class="fas fa-user text-blue-500 mr-1"></i>
+                                                Username
+                                            </label>
+                                            <div class="mt-1 relative rounded-md shadow-sm">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class="fas fa-user text-gray-400"></i>
+                                                </div>
+                                                <input type="text" name="username" id="username" 
+                                                    value="<?php echo htmlspecialchars($current_admin['username']); ?>" 
+                                                    class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md bg-gray-50" 
+                                                    readonly>
+                                            </div>
+                                            <p class="mt-1 text-xs text-gray-500">Username tidak dapat diubah</p>
+                                        </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label for="admin_username" class="block text-sm font-medium text-gray-700">Username</label>
-                                    <input type="text" name="admin_username" id="admin_username" 
-                                           value="<?php echo htmlspecialchars($_SESSION['admin_username'] ?? ''); ?>"
-                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                           disabled>
-                                </div>
-                                
-                                <div>
-                                    <label for="admin_email" class="block text-sm font-medium text-gray-700">Email</label>
-                                    <input type="email" name="admin_email" id="admin_email" 
-                                           value="<?php echo htmlspecialchars($_SESSION['admin_email'] ?? ''); ?>"
-                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                </div>
-                                
-                                <div>
-                                    <label for="current_password" class="block text-sm font-medium text-gray-700">Password Saat Ini</label>
-                                    <div class="mt-1 relative rounded-md shadow-sm">
-                                        <input type="password" name="current_password" id="current_password" 
-                                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                        <button type="button" onclick="togglePassword('current_password')" 
-                                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700">
-                                            <i class="far fa-eye"></i>
-                                        </button>
+                                        <!-- Email Field -->
+                                        <div class="space-y-1">
+                                            <label for="email" class="block text-sm font-medium text-gray-700">
+                                                <i class="fas fa-envelope text-blue-500 mr-1"></i>
+                                                Email
+                                            </label>
+                                            <div class="mt-1 relative rounded-md shadow-sm">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class="fas fa-envelope text-gray-400"></i>
+                                                </div>
+                                                <input type="email" name="email" id="email" 
+                                                    value="<?php echo htmlspecialchars($current_admin['email']); ?>" 
+                                                    class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" 
+                                                    placeholder="email@contoh.com" required>
+                                            </div>
+                                        </div>
+
+                                        <!-- Full Name Field -->
+                                        <div class="space-y-1 md:col-span-2">
+                                            <label for="fullname" class="block text-sm font-medium text-gray-700">
+                                                <i class="fas fa-id-card text-blue-500 mr-1"></i>
+                                                Nama Lengkap
+                                            </label>
+                                            <div class="mt-1 relative rounded-md shadow-sm">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class="fas fa-user-tag text-gray-400"></i>
+                                                </div>
+                                                <input type="text" name="fullname" id="fullname" 
+                                                    value="<?php echo htmlspecialchars($current_admin['fullname']); ?>" 
+                                                    class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" 
+                                                    placeholder="Nama lengkap admin" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Phone Number Field -->
+                                        <div class="space-y-1">
+                                            <label for="phone" class="block text-sm font-medium text-gray-700">
+                                                <i class="fas fa-phone text-blue-500 mr-1"></i>
+                                                Nomor Telepon
+                                            </label>
+                                            <div class="mt-1 relative rounded-md shadow-sm">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class="fas fa-phone-alt text-gray-400"></i>
+                                                </div>
+                                                <input type="tel" name="phone" id="phone" 
+                                                    value="<?php echo htmlspecialchars($current_admin['phone']); ?>" 
+                                                    class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" 
+                                                    placeholder="081234567890" required>
+                                            </div>
+                                        </div>
+
+                                        <!-- Current Password Field -->
+                                        <div class="space-y-1">
+                                            <label for="current_password" class="block text-sm font-medium text-gray-700">
+                                                <i class="fas fa-lock text-blue-500 mr-1"></i>
+                                                Password Saat Ini
+                                            </label>
+                                            <div class="mt-1 relative rounded-md shadow-sm">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class="fas fa-key text-gray-400"></i>
+                                                </div>
+                                                <input type="password" name="current_password" id="current_password" 
+                                                    class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" 
+                                                    placeholder="••••••••"
+                                                    autocomplete="current-password">
+                                            </div>
+                                            <p class="mt-1 text-xs text-gray-500">Wajib diisi untuk mengubah password</p>
+                                        </div>
+
+                                        <!-- New Password Field -->
+                                        <div class="space-y-1">
+                                            <label for="new_password" class="block text-sm font-medium text-gray-700">
+                                                <i class="fas fa-key text-blue-500 mr-1"></i>
+                                                Password Baru
+                                            </label>
+                                            <div class="mt-1 relative rounded-md shadow-sm">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class="fas fa-lock text-gray-400"></i>
+                                                </div>
+                                                <input type="password" name="new_password" id="new_password" 
+                                                    class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" 
+                                                    placeholder="••••••••"
+                                                    autocomplete="new-password">
+                                            </div>
+                                            <p class="mt-1 text-xs text-gray-500">Minimal 8 karakter, gunakan kombinasi huruf dan angka</p>
+                                        </div>
+
+                                        <!-- Password Strength Meter -->
+                                        <div class="md:col-span-2">
+                                            <div id="password-strength" class="h-1 bg-gray-200 rounded-full overflow-hidden mt-1 hidden">
+                                                <div id="password-strength-bar" class="h-full w-0 transition-all duration-300"></div>
+                                            </div>
+                                            <p id="password-strength-text" class="text-xs mt-1 hidden"></p>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <div>
-                                    <label for="new_password" class="block text-sm font-medium text-gray-700">Password Baru</label>
-                                    <div class="mt-1 relative rounded-md shadow-sm">
-                                        <input type="password" name="new_password" id="new_password" 
-                                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                        <button type="button" onclick="togglePassword('new_password')" 
-                                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700">
-                                            <i class="far fa-eye"></i>
-                                        </button>
-                                    </div>
-                                    <p class="mt-1 text-xs text-gray-500">Biarkan kosong jika tidak ingin mengubah password</p>
                                 </div>
                                 
                                 <div class="md:col-span-2">
@@ -396,15 +544,15 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                                 </div>
                             </div>
                             
-                            <div class="pt-5">
-                                <div class="flex justify-end">
-                                    <button type="reset" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        Reset
-                                    </button>
-                                    <button type="submit" name="update_admin" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        Simpan Perubahan
-                                    </button>
-                                </div>
+                            </div>
+                            <!-- Action Buttons -->
+                            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 text-right">
+                                <button type="reset" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                                    <i class="fas fa-undo mr-2"></i> Reset
+                                </button>
+                                <button type="submit" name="update_admin" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                                    <i class="fas fa-save mr-2"></i> Simpan Perubahan
+                                </button>
                             </div>
                         </form>
                     </div>
