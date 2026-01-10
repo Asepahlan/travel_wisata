@@ -94,135 +94,175 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         .login-card {
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        @media (max-width: 640px) {
+            .login-card {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+        body {
+            background-color: #f9fafb;
+        }
+        .login-bg {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        }
+        .form-input, .form-textarea, .form-select, .form-multiselect {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: #fff;
+            border-color: #d1d5db;
+            border-width: 1px;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            width: 100%;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus, .form-multiselect:focus {
+            outline: none;
+            ring: 2px;
+            ring-color: #3b82f6;
+            border-color: #3b82f6;
         }
     </style>
 </head>
-<body class="h-full">
-    <div class="min-h-screen flex">
+<body class="min-h-screen bg-gray-50">
+    <div class="min-h-screen flex flex-col lg:flex-row">
         <!-- Left side with background -->
-        <div class="hidden lg:flex flex-col justify-between flex-1 login-bg p-12 text-white">
-            <div class="max-w-md">
-                <h1 class="text-4xl font-bold mb-4"><?php echo defined('site_name') ? constant('site_name') : 'Travel Wisata'; ?></h1>
-                <p class="text-blue-100 text-lg">Sistem Manajemen Perjalanan Wisata</p>
+        <div class="lg:w-1/2 xl:w-2/3 hidden lg:flex flex-col justify-between p-6 md:p-12 text-white login-bg">
+            <div class="max-w-md mx-auto lg:mx-0 w-full">
+                <h1 class="text-3xl md:text-4xl font-bold mb-3 md:mb-4"><?php echo defined('site_name') ? constant('site_name') : 'Travel Wisata'; ?></h1>
+                <p class="text-blue-100 text-base md:text-lg">Sistem Manajemen Perjalanan Wisata</p>
             </div>
-            <div class="mt-auto">
-                <p class="text-blue-200 text-sm">
+            <div class="mt-8 lg:mt-auto text-center lg:text-left">
+                <p class="text-blue-200 text-xs md:text-sm">
                     &copy; <?php echo date('Y'); ?> <?php echo defined('site_name') ? constant('site_name') : 'Travel Wisata'; ?>. All rights reserved.
                 </p>
             </div>
         </div>
 
         <!-- Right side with login form -->
-        <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+        <div class="flex-1 flex flex-col justify-center py-6 sm:py-12 px-4 sm:px-6 lg:flex-none lg:px-12 xl:px-16">
             <div class="mx-auto w-full max-w-md">
-                <div class="text-center">
-                    <h2 class="text-3xl font-extrabold text-gray-900">Masuk ke Dashboard</h2>
-                    <p class="mt-2 text-sm text-gray-600">
-                        atau
-                        <a href="../" class="font-medium text-blue-600 hover:text-blue-500">
-                            kembali ke beranda
-                        </a>
-                    </p>
+                <!-- Mobile Logo (only shown on small screens) -->
+                <div class="lg:hidden mb-8 text-center">
+                    <h1 class="text-2xl font-bold text-blue-800 mb-2"><?php echo defined('site_name') ? constant('site_name') : 'Travel Wisata'; ?></h1>
+                    <p class="text-blue-600 text-sm">Sistem Manajemen Perjalanan Wisata</p>
                 </div>
-
-                <div class="mt-8 bg-white py-8 px-4 shadow login-card sm:rounded-lg sm:px-10">
-                    <?php if ($error): ?>
-                        <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div class="ml-3">
-                                    <p class="text-sm text-red-700">
-                                        <?php echo htmlspecialchars($error); ?>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-
-                    <form class="space-y-6" action="login.php" method="POST">
-                        <div>
-                            <label for="username" class="block text-sm font-medium text-gray-700">
-                                Username
-                            </label>
-                            <div class="mt-1 relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-user text-gray-400"></i>
-                                </div>
-                                <input id="username" name="username" type="text" required 
-                                    class="appearance-none block w-full px-3 pl-10 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    placeholder="Masukkan username">
-                            </div>
-                        </div>
-
-                        <div class="space-y-1">
-                            <label for="password" class="block text-sm font-medium text-gray-700">
-                                Password
-                            </label>
-                            <div class="mt-1 relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-lock text-gray-400"></i>
-                                </div>
-                                <input id="password" name="password" type="password" autocomplete="current-password" required 
-                                    class="appearance-none block w-full px-3 pl-10 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    placeholder="Masukkan password">
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <input id="remember_me" name="remember_me" type="checkbox" 
-                                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                <label for="remember_me" class="ml-2 block text-sm text-gray-700">
-                                    Ingat saya
-                                </label>
-                            </div>
-
-                            <div class="text-sm">
-                                <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
-                                    Lupa password?
+                
+                <div class="bg-white rounded-lg shadow-sm login-card">
+                    <div class="px-4 py-5 sm:p-6">
+                        <div class="text-center">
+                            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Masuk ke Dashboard</h2>
+                            <p class="mt-2 text-sm text-gray-600">
+                                atau
+                                <a href="../" class="font-medium text-blue-600 hover:text-blue-500">
+                                    kembali ke beranda
                                 </a>
-                            </div>
+                            </p>
                         </div>
 
-                        <div>
-                            <button type="submit" 
-                                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
-                                Masuk
-                            </button>
-                        </div>
-                    </form>
-
-                    <div class="mt-6">
-                        <div class="relative">
-                            <div class="absolute inset-0 flex items-center">
-                                <div class="w-full border-t border-gray-300"></div>
+                        <?php if ($error): ?>
+                            <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 pt-0.5">
+                                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-red-700">
+                                            <?php echo htmlspecialchars($error); ?>
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="relative flex justify-center text-sm">
-                                <span class="px-2 bg-white text-gray-500">
-                                    Atau hubungi admin
-                                </span>
-                            </div>
-                        </div>
+                        <?php endif; ?>
 
-                        <div class="mt-6 grid grid-cols-1 gap-3">
-                            <a href="#" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                <span class="sr-only">Sign in with Email</span>
-                                <i class="fas fa-envelope text-gray-500"></i>
-                                <span class="ml-2">Email Admin</span>
-                            </a>
+                        <form class="space-y-4 md:space-y-6" action="login.php" method="POST">
+                            <div>
+                                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Username
+                                </label>
+                                <div class="relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-user text-gray-400"></i>
+                                    </div>
+                                    <input id="username" name="username" type="text" required 
+                                        class="form-input pl-10 block w-full sm:text-sm"
+                                        placeholder="Masukkan username">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Password
+                                </label>
+                                <div class="relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-lock text-gray-400"></i>
+                                    </div>
+                                    <input id="password" name="password" type="password" autocomplete="current-password" required 
+                                        class="form-input pl-10 block w-full sm:text-sm"
+                                        placeholder="Masukkan password">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <input id="remember_me" name="remember_me" type="checkbox" 
+                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label for="remember_me" class="ml-2 block text-sm text-gray-700">
+                                        Ingat saya
+                                    </label>
+                                </div>
+
+                                <div class="text-sm">
+                                    <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
+                                        Lupa password?
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="pt-2">
+                                <button type="submit" 
+                                    class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                                    Masuk
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="mt-6 pt-4 border-t border-gray-200">
+                            <div class="relative">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-gray-200"></div>
+                                </div>
+                                <div class="relative flex justify-center text-sm">
+                                    <span class="px-2 bg-white text-gray-500">
+                                        Atau hubungi admin
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 text-center">
+                                <p class="text-sm text-gray-600">
+                                    Butuh bantuan? 
+                                    <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
+                                        Hubungi tim support
+                                    </a>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Mobile footer -->
-                <div class="mt-8 text-center text-sm text-gray-500 lg:hidden">
+                <div class="mt-6 lg:mt-8 text-center text-xs text-gray-500 lg:hidden">
                     <p>
-                        &copy; <?php echo date('Y'); ?> <?php echo defined('site_name') ? constant('site_name') : 'Travel Wisata'; ?>. All rights reserved.
+                        &copy; <?php echo date('Y'); ?> <?php echo defined('site_name') ? constant('site_name') : 'Travel Wisata' ?>. All rights reserved.
                     </p>
                 </div>
             </div>
