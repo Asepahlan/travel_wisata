@@ -164,7 +164,7 @@ $routes = $pdo->query($query)->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - <?php echo defined('SITE_NAME') ? SITE_NAME : 'Travel Wisata'; ?> Admin</title>
+    <title><?php echo $page_title; ?> - <?php echo defined('site_name') ? constant('site_name') : 'Travel Wisata'; ?> Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -173,25 +173,57 @@ $routes = $pdo->query($query)->fetchAll();
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="flex h-screen overflow-hidden">
-        <!-- Include Sidebar -->
-        <?php include 'partials/sidebar.php'; ?>
+<?php ob_start(); ?>
 
-        <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
-            <!-- Top Bar -->
-            <header class="bg-white shadow">
-                <div class="flex justify-between items-center px-6 py-4">
-                    <h2 class="text-xl font-semibold text-gray-800">Manajemen Rute Perjalanan</h2>
-                    <div class="flex items-center">
-                        <span class="text-gray-600 mr-4"><?php echo htmlspecialchars($_SESSION['admin_nama']); ?></span>
-                        <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                            <?php echo strtoupper(substr($_SESSION['admin_nama'], 0, 1)); ?>
-                        </div>
-                    </div>
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-800">Manajemen Rute Perjalanan</h1>
+        <!-- <button onclick="showAddModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring focus:ring-blue-200 active:bg-blue-800 transition">
+            <i class="fas fa-plus mr-2"></i> Tambah Rute
+        </button> -->
+    </div>
+
+    <!-- Flash Message -->
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded" role="alert">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle"></i>
                 </div>
-            </header>
+                <div class="ml-3">
+                    <p class="text-sm"><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded" role="alert">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- Routes Table -->
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asal - Tujuan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jarak (km)</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu Tempuh</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
 
             <div class="p-6">
                 <!-- Flash Message -->
@@ -579,5 +611,202 @@ $routes = $pdo->query($query)->fetchAll();
             }
         }
     </script>
-</body>
-</html>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah/Edit Rute -->
+<div id="routeModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-5 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+        <div class="mt-2">
+            <div class="flex justify-between items-center pb-3 border-b">
+                <h3 class="text-xl font-semibold text-gray-800" id="modalTitle">Tambah Rute Perjalanan</h3>
+                <button type="button" onclick="hideModal()" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="routeForm" action="" method="post" class="mt-6 space-y-6">
+                <input type="hidden" name="action" id="formAction" value="tambah">
+                <input type="hidden" name="id" id="routeId">
+                
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Kota Asal -->
+                        <div>
+                            <label for="asal" class="block text-sm font-medium text-gray-700 mb-1">Kota Asal <span class="text-red-500">*</span></label>
+                            <input type="text" name="asal" id="asal" required
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        </div>
+                        
+                        <!-- Kota Tujuan -->
+                        <div>
+                            <label for="tujuan" class="block text-sm font-medium text-gray-700 mb-1">Kota Tujuan <span class="text-red-500">*</span></label>
+                            <input type="text" name="tujuan" id="tujuan" required
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        </div>
+                        
+                        <!-- Jarak -->
+                        <div>
+                            <label for="jarak" class="block text-sm font-medium text-gray-700 mb-1">Jarak (km) <span class="text-red-500">*</span></label>
+                            <input type="text" name="jarak" id="jarak" required oninput="formatNumber(this)"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        </div>
+                        
+                        <!-- Waktu Tempuh -->
+                        <div>
+                            <label for="waktu_tempuh" class="block text-sm font-medium text-gray-700 mb-1">Waktu Tempuh (jam) <span class="text-red-500">*</span></label>
+                            <input type="number" name="waktu_tempuh" id="waktu_tempuh" min="1" required
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        </div>
+                        
+                        <!-- Rute Via -->
+                        <div class="md:col-span-2">
+                            <label for="rute_via" class="block text-sm font-medium text-gray-700 mb-1">Rute Via</label>
+                            <input type="text" name="rute_via" id="rute_via"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            <p class="mt-1 text-xs text-gray-500">Isi dengan rute perjalanan (opsional)</p>
+                        </div>
+                        
+                        <!-- Keterangan -->
+                        <div class="md:col-span-2">
+                            <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
+                            <textarea name="keterangan" id="keterangan" rows="3"
+                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                        </div>
+                        
+                        <!-- Status -->
+                        <div class="flex items-center">
+                            <input type="checkbox" name="status" id="status" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="status" class="ml-2 block text-sm text-gray-700">Aktif</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="pt-5 border-t border-gray-200">
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="hideModal()" class="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200">
+                            Batal
+                        </button>
+                        <button type="submit" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle status rute
+function toggleRouteStatus(id, currentStatus) {
+    const newStatus = currentStatus === 'aktif' ? 'nonaktif' : 'aktif';
+    
+    fetch('routes.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=toggle_status&id=${id}&status=${newStatus}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            Swal.fire({
+                title: 'Error!',
+                text: data.message || 'Gagal memperbarui status rute',
+                icon: 'error',
+                confirmButtonText: 'Tutup'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: 'Terjadi kesalahan saat memperbarui status rute',
+            icon: 'error',
+            confirmButtonText: 'Tutup'
+        });
+    });
+}
+
+// Format input angka
+function formatNumber(input) {
+    // Hanya izinkan angka dan koma
+    input.value = input.value.replace(/[^0-9,]/g, '');
+    
+    // Ganti koma dengan titik untuk format desimal
+    input.value = input.value.replace(',', '.');
+    
+    // Pastikan hanya ada satu titik desimal
+    if ((input.value.match(/\./g) || []).length > 1) {
+        input.value = input.value.slice(0, -1);
+    }
+}
+
+// Tampilkan modal tambah
+function showAddModal() {
+    document.getElementById('modalTitle').textContent = 'Tambah Rute Perjalanan';
+    document.getElementById('formAction').value = 'tambah';
+    document.getElementById('routeForm').reset();
+    document.getElementById('status').checked = true;
+    document.getElementById('routeModal').classList.remove('hidden');
+}
+
+// Tampilkan modal edit
+function editRoute(route) {
+    document.getElementById('modalTitle').textContent = 'Edit Rute Perjalanan';
+    document.getElementById('formAction').value = 'edit';
+    document.getElementById('routeId').value = route.id;
+    document.getElementById('asal').value = route.asal;
+    document.getElementById('tujuan').value = route.tujuan;
+    document.getElementById('jarak').value = route.jarak;
+    document.getElementById('waktu_tempuh').value = route.durasi_jam;
+    document.getElementById('rute_via').value = route.rute_via || '';
+    document.getElementById('keterangan').value = route.keterangan || '';
+    document.getElementById('status').checked = route.status === 'aktif';
+    document.getElementById('routeModal').classList.remove('hidden');
+}
+
+// Sembunyikan modal
+function hideModal() {
+    document.getElementById('routeModal').classList.add('hidden');
+}
+
+// Konfirmasi hapus
+function confirmDelete(id, asal, tujuan) {
+    Swal.fire({
+        title: 'Hapus Rute',
+        html: `Apakah Anda yakin ingin menghapus rute <strong>${asal} - ${tujuan}</strong>?<br><span class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</span>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = `routes.php?action=hapus&id=${id}`;
+        }
+    });
+}
+
+// Tutup modal saat mengklik di luar modal
+window.onclick = function(event) {
+    const modal = document.getElementById('routeModal');
+    if (event.target === modal) {
+        hideModal();
+    }
+}
+</script>
+
+<?php
+// Get the buffered content and include the layout
+$content = ob_get_clean();
+include 'includes/layout.php';
+?>

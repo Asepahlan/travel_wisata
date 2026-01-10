@@ -93,111 +93,138 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            background-color: #f8fafc;
-        }
-        .login-container {
-            min-height: 100vh;
+        .login-card {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="login-container flex items-center justify-center p-4">
-        <div class="w-full max-w-md">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800"><?php echo defined('site_name') ? constant('site_name') : 'Travel Wisata'; ?></h1>
-                <p class="text-gray-600 mt-2">Panel Admin</p>
+<body class="h-full">
+    <div class="min-h-screen flex">
+        <!-- Left side with background -->
+        <div class="hidden lg:flex flex-col justify-between flex-1 login-bg p-12 text-white">
+            <div class="max-w-md">
+                <h1 class="text-4xl font-bold mb-4"><?php echo defined('site_name') ? constant('site_name') : 'Travel Wisata'; ?></h1>
+                <p class="text-blue-100 text-lg">Sistem Manajemen Perjalanan Wisata</p>
             </div>
-            
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div class="px-8 py-10">
-                    <div class="text-center mb-8">
-                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
-                            <i class="fas fa-user-shield text-blue-600 text-2xl"></i>
-                        </div>
-                        <h2 class="text-2xl font-bold text-gray-800">Masuk ke Dashboard</h2>
-                        <p class="text-gray-600 mt-1">Masukkan kredensial Anda untuk melanjutkan</p>
-                    </div>
-                    
+            <div class="mt-auto">
+                <p class="text-blue-200 text-sm">
+                    &copy; <?php echo date('Y'); ?> <?php echo defined('site_name') ? constant('site_name') : 'Travel Wisata'; ?>. All rights reserved.
+                </p>
+            </div>
+        </div>
+
+        <!-- Right side with login form -->
+        <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+            <div class="mx-auto w-full max-w-md">
+                <div class="text-center">
+                    <h2 class="text-3xl font-extrabold text-gray-900">Masuk ke Dashboard</h2>
+                    <p class="mt-2 text-sm text-gray-600">
+                        atau
+                        <a href="../" class="font-medium text-blue-600 hover:text-blue-500">
+                            kembali ke beranda
+                        </a>
+                    </p>
+                </div>
+
+                <div class="mt-8 bg-white py-8 px-4 shadow login-card sm:rounded-lg sm:px-10">
                     <?php if ($error): ?>
-                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded">
+                        <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4">
                             <div class="flex">
                                 <div class="flex-shrink-0">
-                                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                                    <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                    </svg>
                                 </div>
                                 <div class="ml-3">
-                                    <p class="text-sm text-red-700"><?php echo $error; ?></p>
+                                    <p class="text-sm text-red-700">
+                                        <?php echo htmlspecialchars($error); ?>
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     <?php endif; ?>
-                    
-                    <form action="" method="post" class="space-y-6">
+
+                    <form class="space-y-6" action="login.php" method="POST">
                         <div>
-                            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                            <div class="relative rounded-md shadow-sm">
+                            <label for="username" class="block text-sm font-medium text-gray-700">
+                                Username
+                            </label>
+                            <div class="mt-1 relative rounded-md shadow-sm">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class="fas fa-user text-gray-400"></i>
                                 </div>
-                                <input type="text" 
-                                       id="username" 
-                                       name="username" 
-                                       class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border border-gray-300 rounded-md" 
-                                       placeholder="Masukkan username"
-                                       required
-                                       autofocus>
+                                <input id="username" name="username" type="text" required 
+                                    class="appearance-none block w-full px-3 pl-10 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    placeholder="Masukkan username">
                             </div>
                         </div>
-                        
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                            <div class="relative rounded-md shadow-sm">
+
+                        <div class="space-y-1">
+                            <label for="password" class="block text-sm font-medium text-gray-700">
+                                Password
+                            </label>
+                            <div class="mt-1 relative rounded-md shadow-sm">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class="fas fa-lock text-gray-400"></i>
                                 </div>
-                                <input type="password" 
-                                       id="password" 
-                                       name="password" 
-                                       class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border border-gray-300 rounded-md" 
-                                       placeholder="Masukkan password"
-                                       required>
+                                <input id="password" name="password" type="password" autocomplete="current-password" required 
+                                    class="appearance-none block w-full px-3 pl-10 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    placeholder="Masukkan password">
                             </div>
                         </div>
-                        
+
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                                <input id="remember_me" name="remember_me" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <input id="remember_me" name="remember_me" type="checkbox" 
+                                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                                 <label for="remember_me" class="ml-2 block text-sm text-gray-700">
                                     Ingat saya
                                 </label>
                             </div>
-                            
+
                             <div class="text-sm">
-                                <a href="forgot-password.php" class="font-medium text-blue-600 hover:text-blue-500">
+                                <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
                                     Lupa password?
                                 </a>
                             </div>
                         </div>
-                        
+
                         <div>
-                            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                <i class="fas fa-sign-in-alt mr-2"></i> Masuk
+                            <button type="submit" 
+                                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                Masuk
                             </button>
                         </div>
                     </form>
+
+                    <div class="mt-6">
+                        <div class="relative">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-gray-300"></div>
+                            </div>
+                            <div class="relative flex justify-center text-sm">
+                                <span class="px-2 bg-white text-gray-500">
+                                    Atau hubungi admin
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 grid grid-cols-1 gap-3">
+                            <a href="#" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <span class="sr-only">Sign in with Email</span>
+                                <i class="fas fa-envelope text-gray-500"></i>
+                                <span class="ml-2">Email Admin</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="bg-gray-50 px-8 py-4 border-t border-gray-200 text-center">
-                    <p class="text-xs text-gray-600">
+
+                <!-- Mobile footer -->
+                <div class="mt-8 text-center text-sm text-gray-500 lg:hidden">
+                    <p>
                         &copy; <?php echo date('Y'); ?> <?php echo defined('site_name') ? constant('site_name') : 'Travel Wisata'; ?>. All rights reserved.
                     </p>
                 </div>
-            </div>
-            
-            <div class="mt-6 text-center">
-                <a href="../index.php" class="text-sm font-medium text-blue-600 hover:text-blue-500">
-                    <i class="fas fa-arrow-left mr-1"></i> Kembali ke Beranda
-                </a>
             </div>
         </div>
     </div>

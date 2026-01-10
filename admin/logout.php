@@ -1,21 +1,33 @@
 <?php
 require_once '../config/config.php';
 
-// Hapus semua data sesi
+// Start the session
+session_start();
+
+// Unset all session variables
 $_SESSION = [];
 
-// Hapus cookie sesi
+// Delete the session cookie
 if (ini_get("session.use_cookies")) {
     $params = session_get_cookie_params();
-    setcookie(session_name(), '', time() - 42000,
-        $params["path"], $params["domain"],
-        $params["secure"], $params["httponly"]
+    setcookie(
+        session_name(),
+        '',
+        time() - 42000,
+        $params["path"],
+        $params["domain"],
+        $params["secure"],
+        $params["httponly"]
     );
 }
 
-// Hancurkan sesi
+// Destroy the session
 session_destroy();
 
-// Redirect ke halaman login
+// Set success message in session
+session_start();
+$_SESSION['logout_success'] = 'Anda telah berhasil keluar. Sampai jumpa kembali!';
+
+// Redirect to login page with success message
 header('Location: login.php');
 exit();

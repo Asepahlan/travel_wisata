@@ -151,25 +151,58 @@ $armadas = $pdo->query("SELECT * FROM armada WHERE status = 'tersedia' OR id IN 
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="flex h-screen overflow-hidden">
-        <!-- Include Sidebar -->
-        <?php include 'partials/sidebar.php'; ?>
+<?php ob_start(); ?>
 
-        <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
-            <!-- Top Bar -->
-            <header class="bg-white shadow">
-                <div class="flex justify-between items-center px-6 py-4">
-                    <h2 class="text-xl font-semibold text-gray-800">Manajemen Supir</h2>
-                    <div class="flex items-center">
-                        <span class="text-gray-600 mr-4"><?php echo htmlspecialchars($_SESSION['admin_nama']); ?></span>
-                        <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                            <?php echo strtoupper(substr($_SESSION['admin_nama'], 0, 1)); ?>
-                        </div>
-                    </div>
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-800">Manajemen Supir</h1>
+        <!-- <button onclick="showAddModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring focus:ring-blue-200 active:bg-blue-800 transition">
+            <i class="fas fa-plus mr-2"></i> Tambah Supir
+        </button> -->
+    </div>
+
+    <!-- Flash Message -->
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded" role="alert">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle"></i>
                 </div>
-            </header>
+                <div class="ml-3">
+                    <p class="text-sm"><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded" role="alert">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- Drivers Table -->
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <!-- <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Supir</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kontak</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. SIM</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Armada</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead> -->
 
             <div class="p-6">
                 <!-- Flash Message -->
@@ -521,5 +554,155 @@ $armadas = $pdo->query("SELECT * FROM armada WHERE status = 'tersedia' OR id IN 
             e.target.value = value;
         });
     </script>
-</body>
-</html>
+    </div>
+</div>
+
+<!-- Modal Tambah/Edit Supir -->
+<div id="driverModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-5 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+        <div class="mt-2">
+            <div class="flex justify-between items-center pb-3 border-b">
+                <h3 class="text-xl font-semibold text-gray-800" id="modalTitle">Tambah Supir</h3>
+                <button type="button" onclick="hideModal()" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="driverForm" action="" method="post" class="mt-6 space-y-6">
+                <input type="hidden" name="action" id="formAction" value="tambah">
+                <input type="hidden" name="id" id="driverId">
+                
+                <div class="space-y-6">
+                    <!-- Nama Supir -->
+                    <div>
+                        <label for="nama_supir" class="block text-sm font-medium text-gray-700 mb-1">Nama Supir <span class="text-red-500">*</span></label>
+                        <input type="text" name="nama_supir" id="nama_supir" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                    </div>
+                    
+                    <!-- No. Telepon -->
+                    <div>
+                        <label for="no_telepon" class="block text-sm font-medium text-gray-700 mb-1">No. Telepon <span class="text-red-500">*</span></label>
+                        <input type="text" name="no_telepon" id="no_telepon" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                    </div>
+                    
+                    <!-- Alamat -->
+                    <div>
+                        <label for="alamat" class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+                        <textarea name="alamat" id="alamat" rows="2"
+                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                    </div>
+                    
+                    <!-- No. SIM -->
+                    <div>
+                        <label for="no_sim" class="block text-sm font-medium text-gray-700 mb-1">No. SIM <span class="text-red-500">*</span></label>
+                        <input type="text" name="no_sim" id="no_sim" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                    </div>
+                    
+                    <!-- Armada -->
+                    <div>
+                        <label for="id_armada" class="block text-sm font-medium text-gray-700 mb-1">Armada</label>
+                        <select name="id_armada" id="id_armada"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            <option value="">Pilih Armada (Opsional)</option>
+                            <?php foreach ($fleets as $fleet): ?>
+                                <option value="<?php echo $fleet['id']; ?>">
+                                    <?php echo htmlspecialchars($fleet['nama'] . ' (' . $fleet['nomor_polisi'] . ')'); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="flex items-center">
+                        <input type="checkbox" name="status" id="status" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="status" class="ml-2 block text-sm text-gray-700">Tersedia</label>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="pt-5 border-t border-gray-200">
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="hideModal()" class="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200">
+                            Batal
+                        </button>
+                        <button type="submit" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Tampilkan modal tambah
+function showAddModal() {
+    document.getElementById('modalTitle').textContent = 'Tambah Supir';
+    document.getElementById('formAction').value = 'tambah';
+    document.getElementById('driverForm').reset();
+    document.getElementById('status').checked = true;
+    document.getElementById('driverModal').classList.remove('hidden');
+}
+
+// Tampilkan modal edit
+function editDriver(id, nama, telepon, alamat, noSim, armadaId, status) {
+    document.getElementById('modalTitle').textContent = 'Edit Supir';
+    document.getElementById('formAction').value = 'edit';
+    document.getElementById('driverId').value = id;
+    document.getElementById('nama_supir').value = nama;
+    document.getElementById('no_telepon').value = telepon;
+    document.getElementById('alamat').value = alamat || '';
+    document.getElementById('no_sim').value = noSim;
+    document.getElementById('id_armada').value = armadaId || '';
+    document.getElementById('status').checked = status === 'tersedia';
+    document.getElementById('driverModal').classList.remove('hidden');
+}
+
+// Sembunyikan modal
+function hideModal() {
+    document.getElementById('driverModal').classList.add('hidden');
+}
+
+// Konfirmasi hapus
+function confirmDelete(id, nama) {
+    if (confirm(`Apakah Anda yakin ingin menghapus supir "${nama}"?`)) {
+        // Kirim permintaan hapus
+        fetch(`drivers.php?action=hapus&id=${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Gagal menghapus supir');
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menghapus supir');
+        });
+    }
+}
+
+// Tutup modal saat mengklik di luar modal
+window.onclick = function(event) {
+    const modal = document.getElementById('driverModal');
+    if (event.target === modal) {
+        hideModal();
+    }
+}
+</script>
+
+<?php
+// Get the buffered content and include the layout
+$content = ob_get_clean();
+include 'includes/layout.php';
+?>

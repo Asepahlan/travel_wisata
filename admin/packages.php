@@ -9,6 +9,13 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 
 $page_title = 'Manajemen Paket Wisata';
 
+// Ambil data paket
+$query = "SELECT p.*, r.asal, r.tujuan 
+          FROM paket p 
+          LEFT JOIN rute r ON p.id_rute = r.id 
+          ORDER BY p.created_at DESC";
+$packages = $pdo->query($query)->fetchAll();
+
 // Tangani aksi tambah/edit/hapus
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
@@ -118,17 +125,59 @@ $packages = $pdo->query($query)->fetchAll();
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="flex h-screen overflow-hidden">
-        <!-- Include Sidebar -->
-        <?php include 'partials/sidebar.php'; ?>
+<!-- Start output buffering -->
+<?php ob_start(); ?>
 
-        <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
-            <!-- Top Bar -->
-            <header class="bg-white shadow">
-                <div class="flex justify-between items-center px-6 py-4">
-                    <h2 class="text-xl font-semibold text-gray-800">Manajemen Paket Wisata</h2>
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-800">Manajemen Paket Wisata</h1>
+        <button onclick="showAddModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring focus:ring-blue-200 active:bg-blue-800 transition">
+            <i class="fas fa-plus mr-2"></i> Tambah Paket
+        </button>
+    </div>
+
+    <!-- Flash Message -->
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded" role="alert">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm"><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded" role="alert">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- Packages Table -->
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Paket</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rute</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Layanan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
                     <div class="flex items-center">
                         <span class="text-gray-600 mr-4"><?php echo htmlspecialchars($_SESSION['admin_nama']); ?></span>
                         <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
@@ -338,17 +387,19 @@ $packages = $pdo->query($query)->fetchAll();
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Inisialisasi Select2
-        $(document).ready(function() {
-            $('#id_rute').select2({
-                placeholder: 'Pilih Rute',
-                allowClear: true,
-                dropdownParent: $('#packageModal')
-            });
+        // Tunggu sampai dokumen siap
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inisialisasi Select2 jika ada
+            if (typeof $ !== 'undefined' && $.fn.select2) {
+                $('#id_rute').select2({
+                    placeholder: 'Pilih Rute',
+                    allowClear: true,
+                    dropdownParent: $('#packageModal')
+                });
+            } else {
+                console.error('jQuery atau Select2 tidak dimuat dengan benar');
+            }
         });
 
         // Format input harga menjadi currency
@@ -424,5 +475,175 @@ $packages = $pdo->query($query)->fetchAll();
             }
         }
     </script>
-</body>
-</html>
+    </div>
+</div>
+
+<!-- Modal Tambah/Edit Paket -->
+<div id="packageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-5 mx-auto p-5 border w-full max-w-3xl shadow-lg rounded-md bg-white">
+        <div class="mt-2">
+            <div class="flex justify-between items-center pb-3 border-b">
+                <h3 class="text-xl font-semibold text-gray-800" id="modalTitle">Tambah Paket Wisata</h3>
+                <button type="button" onclick="hideModal()" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="packageForm" action="" method="post" class="mt-6 space-y-6">
+                <input type="hidden" name="action" id="formAction" value="tambah">
+                <input type="hidden" name="id" id="packageId">
+                
+                <div class="space-y-6">
+                    <!-- Nama Paket -->
+                    <div>
+                        <label for="nama_paket" class="block text-sm font-medium text-gray-700 mb-1">Nama Paket <span class="text-red-500">*</span></label>
+                        <input type="text" name="nama_paket" id="nama_paket" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                    </div>
+                    
+                    <!-- Rute -->
+                    <div>
+                        <label for="id_rute" class="block text-sm font-medium text-gray-700 mb-1">Rute <span class="text-red-500">*</span></label>
+                        <select name="id_rute" id="id_rute" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            <option value="">Pilih Rute</option>
+                            <?php 
+                            $routes = $pdo->query("SELECT * FROM rute ORDER BY asal, tujuan")->fetchAll();
+                            foreach ($routes as $route): 
+                            ?>
+                                <option value="<?php echo $route['id']; ?>">
+                                    <?php echo htmlspecialchars($route['asal'] . ' - ' . $route['tujuan']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <!-- Jenis Layanan -->
+                    <div>
+                        <label for="jenis_layanan" class="block text-sm font-medium text-gray-700 mb-1">Jenis Layanan <span class="text-red-500">*</span></label>
+                        <select name="jenis_layanan" id="jenis_layanan" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            <option value="reguler">Reguler</option>
+                            <option value="premium">Premium</option>
+                            <option value="vip">VIP</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Harga -->
+                    <div>
+                        <label for="harga" class="block text-sm font-medium text-gray-700 mb-1">Harga <span class="text-red-500">*</span></label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">Rp</span>
+                            </div>
+                            <input type="text" name="harga" id="harga" required
+                                   class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                   onkeyup="formatRupiah(this)">
+                        </div>
+                    </div>
+                    
+                    <!-- Deskripsi -->
+                    <div>
+                        <label for="deskripsi" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                        <textarea name="deskripsi" id="deskripsi" rows="3"
+                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="flex items-center">
+                        <input type="checkbox" name="status" id="status" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="status" class="ml-2 block text-sm text-gray-700">Aktif</label>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="pt-5 border-t border-gray-200">
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="hideModal()" class="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200">
+                            Batal
+                        </button>
+                        <button type="submit" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+// Format Rupiah
+function formatRupiah(input) {
+    let value = input.value.replace(/\D/g, '');
+    value = new Intl.NumberFormat('id-ID').format(value);
+    input.value = value;
+}
+
+// Show add modal
+function showAddModal() {
+    document.getElementById('modalTitle').textContent = 'Tambah Paket Wisata';
+    document.getElementById('formAction').value = 'tambah';
+    document.getElementById('packageForm').reset();
+    document.getElementById('status').checked = true;
+    document.getElementById('packageModal').classList.remove('hidden');
+}
+
+// Show edit modal
+function editPackage(id, nama, idRute, jenisLayanan, harga, deskripsi, status) {
+    document.getElementById('modalTitle').textContent = 'Edit Paket Wisata';
+    document.getElementById('formAction').value = 'edit';
+    document.getElementById('packageId').value = id;
+    document.getElementById('nama_paket').value = nama;
+    document.getElementById('id_rute').value = idRute;
+    document.getElementById('jenis_layanan').value = jenisLayanan;
+    document.getElementById('harga').value = new Intl.NumberFormat('id-ID').format(harga);
+    document.getElementById('deskripsi').value = deskripsi;
+    document.getElementById('status').checked = status === 'aktif';
+    document.getElementById('packageModal').classList.remove('hidden');
+}
+
+// Hide modal
+function hideModal() {
+    document.getElementById('packageModal').classList.add('hidden');
+}
+
+// Confirm delete
+function confirmDelete(id) {
+    if (confirm('Apakah Anda yakin ingin menghapus paket ini?')) {
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = '';
+        
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'hapus';
+        
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'id';
+        idInput.value = id;
+        
+        form.appendChild(actionInput);
+        form.appendChild(idInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('packageModal');
+    if (event.target === modal) {
+        hideModal();
+    }
+}
+</script>
+
+<?php
+// Get the buffered content and include the layout
+$content = ob_get_clean();
+include 'includes/layout.php';
+?>
