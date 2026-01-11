@@ -643,10 +643,6 @@ function printInvoice() {
                             <div class="info-value"><?php echo htmlspecialchars($booking['nama_armada']); ?></div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">Jenis Armada</div>
-                            <div class="info-value"><?php echo htmlspecialchars($booking['jenis_armada']); ?></div>
-                        </div>
-                        <div class="info-item">
                             <div class="info-label">Kapasitas</div>
                             <div class="info-value"><?php echo $booking['kapasitas']; ?> Kursi</div>
                         </div>
