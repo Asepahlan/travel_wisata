@@ -609,10 +609,6 @@ function printInvoice() {
                         <div class="info-label">No. WhatsApp</div>
                         <div class="info-value"><?php echo htmlspecialchars($booking['no_wa']); ?></div>
                     </div>
-                    <div class="info-item">
-                        <div class="info-label">Jumlah Penumpang</div>
-                        <div class="info-value"><?php echo isset($booking['jumlah_penumpang']) ? $booking['jumlah_penumpang'] . ' orang' : '1 orang'; ?></div>
-                    </div>
                 </div>
 
                 <div class="info-card">
@@ -663,7 +659,7 @@ function printInvoice() {
                     <h2 style="margin-bottom: 15px;">Rincian Pembayaran</h2>
                     <div style="background: #f8fafc; border-radius: 8px; padding: 15px; margin-top: 10px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0;">
-                            <span style="color: #4a5568;">Harga Paket (<?php echo isset($booking['jumlah_penumpang']) ? $booking['jumlah_penumpang'] . ' orang' : '1 orang'; ?>)</span>
+                            <span style="color: #4a5568;">Harga Paket</span>
                             <span style="font-weight: 600;"><?php echo $booking['total_harga_formatted']; ?></span>
                         </div>
                         <div style="margin-top: 15px;">
