@@ -77,8 +77,8 @@ $featured_packages = $stmt->fetchAll();
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <?php foreach ($featured_packages as $package): ?>
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="h-48 bg-gray-200 flex items-center justify-center">
-                        <i class="fas fa-route text-4xl text-gray-400"></i>
+                    <div class="h-48 bg-gray-200 relative overflow-hidden">
+                        <img src="assets/images/deas.png" alt="Paket Wisata" class="w-full h-full object-cover">
                     </div>
                     <div class="p-6">
                         <div class="flex justify-between items-start mb-2">

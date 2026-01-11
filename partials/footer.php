@@ -47,6 +47,15 @@
                             <i class="fas fa-clock text-blue-400"></i>
                         </div>
                         <div class="ml-3">
+                            <p class="text-sm text-gray-400">Jam Operasional</p>
+                            <p class="text-gray-300">Buka 24 jam setiap hari</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="flex-shrink-0 mt-1">
+                            <i class="fas fa-globe-americas text-blue-400"></i>
+                        </div>
+                        <div class="ml-3">
                             <p class="text-sm text-gray-400">Zona Waktu</p>
                             <p class="text-gray-300">
                                 <?php 
@@ -62,20 +71,13 @@
                 </ul>
             </div>
             <div>
-                <h3 class="text-lg font-semibold mb-4">Jam Operasional</h3>
+                <h3 class="text-lg font-semibold mb-4">Layanan Kami</h3>
                 <ul class="space-y-2">
-                    <li class="flex justify-between">
-                        <span>Senin - Jumat</span>
-                        <span>08:00 - 17:00 WIB</span>
-                    </li>
-                    <li class="flex justify-between">
-                        <span>Sabtu</span>
-                        <span>09:00 - 15:00 WIB</span>
-                    </li>
-                    <li class="flex justify-between">
-                        <span>Minggu</span>
-                        <span>Tutup</span>
-                    </li>
+                    <li><a href="#" class="text-gray-300 hover:text-blue-400 transition">Paket Wisata</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-blue-400 transition">Sewa Mobil</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-blue-400 transition">Tour Guide</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-blue-400 transition">Paket Keluarga</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-blue-400 transition">Paket Grup</a></li>
                 </ul>
             </div>
         </div>

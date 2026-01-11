@@ -10,9 +10,9 @@
 define('site_name', 'Travel Deas Royan');
 define('SITE_URL', 'http://localhost/');
 define('site_description', 'Layanan travel terpercaya untuk perjalanan Anda');
-define('contact_email', 'info@travelwdfgdfgdisata.com');
-define('contact_phone', '085798347675');
-define('contact_address', 'G723+473, Jalan, Mandalawangi, Kec. Salopa, Kabupaten Tasikmalaya, Jawa Barat');
+define('contact_email', 'deasroyan@gmail.com');
+define('contact_phone', '081323424374');
+define('contact_address', 'Sukarindik, Kec. Bungursari, Kab. Tasikmalaya, Jawa Barat 46151');
 define('timezone', 'Asia/Makassar');
 define('currency', 'IDR');
 

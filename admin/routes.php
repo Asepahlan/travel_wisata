@@ -106,7 +106,21 @@ if (isset($_GET['action']) && $_GET['action'] === 'hapus' && isset($_GET['id']))
         $id = (int)$_GET['id'];
         $response = ['success' => false, 'message' => ''];
         
-        // Cek apakah rute digunakan di paket
+        // Cek status rute
+        $stmt = $pdo->prepare("SELECT status FROM rute WHERE id = ?");
+        $stmt->execute([$id]);
+        $route = $stmt->fetch();
+        
+        if (!$route) {
+            throw new Exception('Rute tidak ditemukan');
+        }
+        
+        // Jika rute aktif, tolak penghapusan
+        if ($route['status'] === 'aktif') {
+            throw new Exception('Tidak dapat menghapus rute yang aktif. Nonaktifkan terlebih dahulu sebelum menghapus.');
+        }
+        
+        // Cek apakah rute digunakan di paket (hanya sebagai informasi tambahan)
         $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM paket WHERE id_rute = ?");
         $stmt->execute([$id]);
         $result = $stmt->fetch();
@@ -215,7 +229,7 @@ $routes = $pdo->query($query)->fetchAll();
     <div class="bg-white shadow-sm rounded-lg overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <!-- <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asal - Tujuan</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jarak (km)</th>
@@ -223,7 +237,7 @@ $routes = $pdo->query($query)->fetchAll();
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
-                </thead>
+                </thead> -->
 
             <div class="p-6">
                 <!-- Flash Message -->
@@ -307,7 +321,7 @@ $routes = $pdo->query($query)->fetchAll();
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                                 <button 
-                                                   onclick="deleteRoute(<?php echo $route['id']; ?>, '<?php echo addslashes($route['asal']); ?>', '<?php echo addslashes($route['tujuan']); ?>')" 
+                                                   onclick="deleteRoute(<?php echo $route['id']; ?>, '<?php echo addslashes($route['asal']); ?>', '<?php echo addslashes($route['tujuan']); ?>', '<?php echo $route['status'] ?? 'nonaktif'; ?>')" 
                                                    class="text-red-600 hover:text-red-900 focus:outline-none"
                                                    title="Hapus">
                                                     <i class="fas fa-trash"></i>
@@ -540,7 +554,24 @@ $routes = $pdo->query($query)->fetchAll();
         });
 
         // Fungsi hapus dengan konfirmasi
-        function deleteRoute(id, asal, tujuan) {
+        function deleteRoute(id, asal, tujuan, status) {
+            // Jika rute aktif, tampilkan pesan khusus
+            if (status === 'aktif') {
+                Swal.fire({
+                    title: 'Tidak Dapat Menghapus',
+                    html: `Rute <strong>${asal} - ${tujuan}</strong> masih aktif.<br><span class="text-sm text-gray-500">Nonaktifkan rute terlebih dahulu sebelum menghapus.</span>`,
+                    icon: 'warning',
+                    confirmButtonText: 'Mengerti',
+                    confirmButtonColor: '#3b82f6',
+                    buttonsStyling: false,
+                    customClass: {
+                        confirmButton: 'px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                    }
+                });
+                return;
+            }
+            
+            // Jika rute tidak aktif, tampilkan konfirmasi hapus
             Swal.fire({
                 title: 'Hapus Rute',
                 html: `Apakah Anda yakin ingin menghapus rute <strong>${asal} - ${tujuan}</strong>?<br><span class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</span>`,
@@ -596,7 +627,11 @@ $routes = $pdo->query($query)->fetchAll();
                             title: 'Error!',
                             text: error.message || 'Terjadi kesalahan saat menghapus rute',
                             icon: 'error',
-                            confirmButtonText: 'Tutup'
+                            confirmButtonText: 'Tutup',
+                            buttonsStyling: false,
+                            customClass: {
+                                confirmButton: 'px-4 py-2 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
+                            }
                         });
                     });
                 }

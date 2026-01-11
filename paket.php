@@ -77,8 +77,8 @@ $routes = $pdo->query("SELECT DISTINCT CONCAT(asal, ' - ', tujuan) as rute FROM 
                          data-rute="<?php echo htmlspecialchars($package['rute']); ?>"
                          data-layanan="<?php echo $package['jenis_layanan']; ?>"
                          data-harga="<?php echo $package['harga']; ?>">
-                        <div class="h-48 bg-gray-200 flex items-center justify-center relative">
-                            <i class="fas fa-route text-5xl text-gray-400"></i>
+                        <div class="h-48 bg-gray-200 relative overflow-hidden">
+                            <img src="assets/images/deas.png" alt="Paket Wisata" class="w-full h-full object-cover">
                             <div class="absolute top-3 right-3">
                                 <span class="bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
                                     <?php echo $package['jenis_layanan'] === 'all_in' ? 'All In' : 'Non All In'; ?>

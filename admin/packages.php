@@ -70,15 +70,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Tangani aksi hapus
 if (isset($_GET['action']) && $_GET['action'] === 'hapus' && isset($_GET['id'])) {
+    header('Content-Type: application/json');
+    
     try {
         $id = (int)$_GET['id'];
+        $response = ['success' => false, 'message' => ''];
+        
+        // Hapus data paket
         $stmt = $pdo->prepare("DELETE FROM paket WHERE id = ?");
-        $stmt->execute([$id]);
-        $_SESSION['success'] = 'Paket berhasil dihapus';
-        header('Location: packages.php');
+        $deleted = $stmt->execute([$id]);
+        
+        if ($deleted) {
+            $response['success'] = true;
+            $response['message'] = 'Paket berhasil dihapus';
+        } else {
+            throw new Exception('Gagal menghapus data paket');
+        }
+        
+        echo json_encode($response);
         exit();
-    } catch (PDOException $e) {
-        $_SESSION['error'] = 'Gagal menghapus paket: ' . $e->getMessage();
+        
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+        exit();
     }
 }
 
@@ -102,7 +120,11 @@ $packages = $pdo->query($query)->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?> - <?php echo defined('site_name') ? constant('site_name') : 'Travel Wisata'; ?> Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .sidebar {
@@ -132,9 +154,9 @@ $packages = $pdo->query($query)->fetchAll();
     <!-- Header -->
     <div class="flex justify-between items-center">
         <h1 class="text-2xl font-bold text-gray-800">Manajemen Paket Wisata</h1>
-        <button onclick="showAddModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring focus:ring-blue-200 active:bg-blue-800 transition">
+        <!-- <button onclick="showAddModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring focus:ring-blue-200 active:bg-blue-800 transition">
             <i class="fas fa-plus mr-2"></i> Tambah Paket
-        </button>
+        </button> -->
     </div>
 
     <!-- Flash Message -->
@@ -168,7 +190,7 @@ $packages = $pdo->query($query)->fetchAll();
     <div class="bg-white shadow-sm rounded-lg overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <!-- <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Paket</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rute</th>
@@ -177,7 +199,7 @@ $packages = $pdo->query($query)->fetchAll();
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
-                </thead>
+                </thead> -->
                     <div class="flex items-center">
                         <span class="text-gray-600 mr-4"><?php echo htmlspecialchars($_SESSION['admin_nama']); ?></span>
                         <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
@@ -264,9 +286,11 @@ $packages = $pdo->query($query)->fetchAll();
                                                         title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
-                                                <a href="#" onclick="deletePackage(<?php echo $package['id']; ?>, '<?php echo addslashes(htmlspecialchars($package['nama_paket'])); ?>')" class="text-red-600 hover:text-red-900" title="Hapus">
+                                                <button onclick="confirmDelete(<?php echo $package['id']; ?>, '<?php echo addslashes(htmlspecialchars($package['nama_paket'])); ?>')" 
+                                                        class="text-red-600 hover:text-red-900 focus:outline-none"
+                                                        title="Hapus">
                                                     <i class="fas fa-trash"></i>
-                                                </a>
+                                                </button>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -572,6 +596,8 @@ $packages = $pdo->query($query)->fetchAll();
     </div>
 </div>
 
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- JavaScript -->
 <script>
 // Format Rupiah
@@ -609,28 +635,72 @@ function hideModal() {
     document.getElementById('packageModal').classList.add('hidden');
 }
 
-// Confirm delete
-function confirmDelete(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus paket ini?')) {
-        const form = document.createElement('form');
-        form.method = 'post';
-        form.action = '';
-        
-        const actionInput = document.createElement('input');
-        actionInput.type = 'hidden';
-        actionInput.name = 'action';
-        actionInput.value = 'hapus';
-        
-        const idInput = document.createElement('input');
-        idInput.type = 'hidden';
-        idInput.name = 'id';
-        idInput.value = id;
-        
-        form.appendChild(actionInput);
-        form.appendChild(idInput);
-        document.body.appendChild(form);
-        form.submit();
-    }
+// Confirm delete with SweetAlert2
+function confirmDelete(id, packageName) {
+    Swal.fire({
+        title: 'Hapus Paket',
+        html: `Apakah Anda yakin ingin menghapus paket <strong>${packageName}</strong>?<br><span class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</span>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'px-4 py-2 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500',
+            cancelButton: 'px-4 py-2 mr-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading state
+            Swal.fire({
+                title: 'Menghapus...',
+                text: 'Sedang menghapus data paket',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Submit the delete request
+            fetch(`packages.php?action=hapus&id=${id}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: data.message || 'Paket berhasil dihapus',
+                        icon: 'success',
+                        confirmButtonText: 'Tutup'
+                    }).then(() => {
+                        // Reload the page to see the changes
+                        window.location.reload();
+                    });
+                } else {
+                    throw new Error(data.message || 'Gagal menghapus paket');
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.message || 'Terjadi kesalahan saat menghapus paket',
+                    icon: 'error',
+                    confirmButtonText: 'Tutup',
+                    buttonsStyling: false,
+                    customClass: {
+                        confirmButton: 'px-4 py-2 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
+                    }
+                });
+            });
+        }
+    });
 }
 
 // Close modal when clicking outside

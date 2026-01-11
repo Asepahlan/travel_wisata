@@ -1,7 +1,9 @@
 <?php
-function isActive($page) {
-    $current_page = basename($_SERVER['PHP_SELF']);
-    return ($current_page === $page) ? 'bg-blue-900' : 'hover:bg-blue-700';
+if (!function_exists('isActive')) {
+    function isActive($page) {
+        $current_page = basename($_SERVER['PHP_SELF']);
+        return ($current_page === $page) ? 'bg-blue-900' : 'hover:bg-blue-700';
+    }
 }
 ?>
 <!DOCTYPE html>
