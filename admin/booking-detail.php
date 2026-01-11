@@ -530,17 +530,32 @@ function printInvoice() {
         </style>
     </head>
     <body>
-        <div class="print-header" style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
+        <div class="print-header" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;">
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
             <tr>
                 <td style="width: 60%; vertical-align: top;">
                     <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                        <img src="${window.location.origin}/assets/images/deas.png" alt="Logo" style="height: 60px; margin-right: 15px;">
+                        <img src="${window.location.origin}/assets/images/deas.png" alt="Logo" style="height: 70px; margin-right: 15px;">
                         <div>
-                            <div style="font-size: 18px; font-weight: bold; color: #1a365d; margin-bottom: 3px;">TRAVEL WISATA</div>
-                            <div style="font-size: 12px; color: #4a5568; line-height: 1.4;">
-                                Jl. Raya No. 123, Kota Wisata, Indonesia<br>
-                                Telp: (021) 12345678 | Email: info@travelwisata.com
+                            <h1 style="color: #1a365d; font-size: 22px; font-weight: bold; margin: 0 0 5px 0; letter-spacing: 0.5px;">
+                                <?php echo htmlspecialchars(strtoupper($settings['site_name'] ?? 'TRAVEL WISATA')); ?>
+                            </h1>
+                            <?php if (!empty($settings['address'])): ?>
+                            <p style="color: #4a5568; margin: 0 0 5px 0; font-size: 12px;">
+                                <?php echo htmlspecialchars($settings['address']); ?>
+                            </p>
+                            <?php endif; ?>
+                            <div style="color: #4a5568; font-size: 12px; line-height: 1.4;">
+                                <?php
+                                $contact_info = [];
+                                if (!empty($settings['contact_phone'])) {
+                                    $contact_info[] = 'Telp: ' . htmlspecialchars($settings['contact_phone']);
+                                }
+                                if (!empty($settings['contact_email'])) {
+                                    $contact_info[] = 'Email: ' . htmlspecialchars($settings['contact_email']);
+                                }
+                                echo implode(' | ', $contact_info);
+                                ?>
                             </div>
                         </div>
                     </div>
@@ -669,12 +684,12 @@ function printInvoice() {
             <?php endif; ?>
         </div>
 
-        <div class="print-footer" style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #e2e8f0; text-align: center; color: #718096; font-size: 11px; line-height: 1.4;">
+        <div class="print-footer" style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #e2e8f0; text-align: center; color: #718096; font-size: 11px; line-height: 1.5;">
             <div style="margin-bottom: 5px;">
-                <span>Terima kasih telah memesan di Travel Wisata</span>
+                <span>Terima kasih telah memesan di <?php echo htmlspecialchars($settings['site_name'] ?? 'Travel Wisata'); ?></span>
             </div>
-            <div style="margin-bottom: 5px;">
-                <span>Invoice ini sah dan diproses oleh sistem • Telp: (021) 12345678</span>
+            <div style="margin-bottom: 5px; color: #a0aec0; font-size: 10px;">
+                <i>Invoice ini sah dan diproses oleh sistem</i>
             </div>
             <div style="font-size: 10px; color: #a0aec0;">
                 Dicetak: ${new Date().toLocaleString('id-ID')}
@@ -698,6 +713,13 @@ function printInvoice() {
 </script>
 
 <?php
+// Get settings from database
+$settings = [];
+$settingsQuery = $pdo->query("SELECT setting_key, setting_value FROM settings");
+while ($row = $settingsQuery->fetch(PDO::FETCH_ASSOC)) {
+    $settings[$row['setting_key']] = $row['setting_value'];
+}
+
 // Get the buffered content and include the layout
 $content = ob_get_clean();
 include 'includes/layout.php';

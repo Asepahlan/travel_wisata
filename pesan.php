@@ -206,8 +206,9 @@ $packages = $pdo->query("SELECT p.*, CONCAT(r.asal, ' - ', r.tujuan) as rute FRO
                                     <option value="">Pilih Paket</option>
                                     <?php foreach ($packages as $package): ?>
                                         <option value="<?php echo $package['id']; ?>" 
+                                            data-harga="<?php echo $package['harga']; ?>"
                                             <?php echo (isset($_POST['id_paket']) && $_POST['id_paket'] == $package['id']) || (isset($selected_package) && $selected_package['id'] == $package['id']) ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($package['rute'] . ' - ' . ($package['jenis_layanan'] === 'all_in' ? 'All In' : 'Non All In')); ?>
+                                            <?php echo htmlspecialchars($package['rute'] . ' - ' . ($package['jenis_layanan'] === 'all_in' ? 'All In' : 'Non All In') . ' (' . formatRupiah($package['harga']) . ')'); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -220,7 +221,7 @@ $packages = $pdo->query("SELECT p.*, CONCAT(r.asal, ' - ', r.tujuan) as rute FRO
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="id_armada" class="block text-sm font-medium text-gray-700">Jenis Armada <span class="text-red-500">*</span></label>
-                                <select id="id_armada" name="id_armada" class="mt-1 form-input <?php echo isset($errors['id_armada']) ? 'border-red-500' : ''; ?>" required>
+                                <select id="id_armada" name="id_armada" class="form-select" required>
                                     <option value="">Pilih Armada</option>
                                     <?php foreach ($vehicles as $vehicle): ?>
                                         <option value="<?php echo $vehicle['id']; ?>" 
@@ -303,21 +304,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to update price
     function updateHarga() {
-        const packageId = idPaket ? idPaket.value : null;
-        const vehicleId = idArmada ? idArmada.value : null;
-        const jumlah = jumlahKendaraan ? (parseInt(jumlahKendaraan.value) || 0) : 0;
+        const packageSelect = idPaket ? idPaket.options[idPaket.selectedIndex] : null;
+        const harga = packageSelect ? parseInt(packageSelect.getAttribute('data-harga') || '0') : 0;
         
-        if (packageId && vehicleId) {
-            // In a real app, you would fetch the price from the server
-            // This is just a fallback with fixed prices
-            const harga = 1000000; // Default price
-            const total = harga * jumlah;
-            
-            if (hargaPerKendaraan) hargaPerKendaraan.textContent = formatRupiah(harga);
-            if (totalHarga) totalHarga.textContent = formatRupiah(total);
-        } else {
-            if (hargaPerKendaraan) hargaPerKendaraan.textContent = 'Rp 0';
-            if (totalHarga) totalHarga.textContent = 'Rp 0';
+        if (hargaPerKendaraan) {
+            hargaPerKendaraan.textContent = formatRupiah(harga);
+        }
+        if (totalHarga) {
+            // Karena hanya 1 kendaraan, total = harga kendaraan
+            totalHarga.textContent = formatRupiah(harga);
         }
     }
     

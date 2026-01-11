@@ -1,61 +1,37 @@
-# Sistem Pemesanan Travel Wisata
+# Sistem Manajemen Travel Wisata
 
-## Deskripsi Project
-Sistem Pemesanan Travel Wisata adalah aplikasi web yang memudahkan pengguna untuk memesan jasa transportasi travel wisata secara online. Aplikasi ini menyediakan berbagai pilihan paket perjalanan dengan rute dan harga yang bervariasi, serta memungkinkan pengguna untuk melakukan pemesanan secara mandiri melalui antarmuka yang user-friendly.
+## Deskripsi
+Sistem Manajemen Travel Wisata adalah aplikasi berbasis web yang dirancang untuk memfasilitasi pengelolaan layanan travel, termasuk pemesanan kendaraan, manajemen armada, dan pelacakan perjalanan. Sistem ini terdiri dari dua antarmuka utama: halaman pengguna untuk pemesanan dan panel admin untuk manajemen.
 
-## Tujuan Project
-1. Menyediakan platform online untuk pemesanan jasa travel wisata
-2. Mempermudah pengguna dalam membandingkan dan memilih paket perjalanan
-3. Meningkatkan efisiensi manajemen pemesanan dan pengelolaan armada
-4. Memberikan pengalaman pemesanan yang cepat, mudah, dan transparan
+## Fitur Utama
 
-## Fitur Aplikasi
+### Pengguna
+- Melihat daftar paket perjalanan
+- Melakukan pemesanan kendaraan
+- Melacak status pemesanan
+- Mencetak bukti pemesanan (PDF)
+- Konfirmasi pemesanan melalui WhatsApp
 
-### Fitur Pengguna
-- Pencarian dan pemilihan paket travel
-- Form pemesanan online
-- Pengecekan status pemesanan
-- Informasi detail armada dan rute
-- Konfirmasi pemesanan via WhatsApp
-- Cetak bukti pemesanan (PDF)
-
-### Fitur Admin
-- Manajemen data paket perjalanan
-- Manajemen armada kendaraan
-- Manajemen supir
-- Monitoring pemesanan
+### Admin
+- Manajemen data armada kendaraan
+- Pengelolaan rute perjalanan
+- Manajemen pemesanan
 - Laporan dan statistik
 - Manajemen pengguna admin
-- Export data ke Excel/PDF
-
-## Alur Kerja Sistem
-1. Pengguna mengunjungi website dan melihat daftar paket perjalanan
-2. Pengguna memilih paket dan mengisi form pemesanan
-3. Sistem memproses pemesanan dan mengirim konfirmasi
-4. Admin menerima notifikasi pemesanan baru
-5. Admin memverifikasi dan mengkonfirmasi ketersediaan
-6. Pengguna melakukan pembayaran dan mengunggah bukti transfer
-7. Admin memvalidasi pembayaran dan mengupdate status pemesanan
-8. Perjalanan berlangsung sesuai jadwal
-9. Setelah perjalanan selesai, status diupdate menjadi selesai
+- Ekspor data ke Excel/PDF
 
 ## Teknologi yang Digunakan
 
 ### Frontend
 - HTML5
-- CSS3 (dengan Tailwind CSS)
-- JavaScript (Vanilla)
+- CSS3 dengan Tailwind CSS
+- JavaScript (ES6+)
 - Font Awesome untuk ikon
 
 ### Backend
 - PHP 8.2+
 - MySQL/MariaDB
 - PDO untuk koneksi database
-
-### Tools & Library
-- Composer (untuk manajemen dependensi)
-- PHPMailer (untuk pengiriman email)
-- FPDF (untuk generate PDF)
 
 ## Struktur Project
 ```
@@ -104,24 +80,52 @@ Database menggunakan MySQL/MariaDB dengan beberapa tabel utama:
 - Composer (untuk dependensi)
 
 ### Langkah-langkah
-1. Clone repository ini
-2. Buat database baru
-3. Import file `travel_wisata.sql` ke database yang telah dibuat
-4. Salin `.env.example` ke `.env` dan sesuaikan konfigurasi database
-5. Install dependensi:
-   ```
-   composer install
-   ```
-6. Pastikan folder `assets` memiliki izin tulis
-7. Akses aplikasi melalui web server
+1. Clone repositori ini ke direktori web server
+2. Buat database baru dan import file `travel_wisata.sql`
+3. Salin `config/config.example.php` menjadi `config/config.php`
+4. Sesuaikan konfigurasi database di `config/config.php`
+5. Pastikan direktori `uploads/` memiliki izin tulis
+6. Akses aplikasi melalui browser
 
-## Konfigurasi
-File konfigurasi utama berada di `config/config.php`. Beberapa pengaturan yang dapat disesuaikan:
-- Koneksi database
-- Nama website
-- Informasi kontak
-- Pengaturan email
-- Konfigurasi WhatsApp
+## Persyaratan Sistem
+
+### Server
+- PHP 7.4 atau lebih baru
+- MySQL 5.7 atau lebih baru
+- Web server (Apache/Nginx)
+- Ekstensi PHP: PDO, MySQLi, JSON, cURL
+
+### Browser
+- Google Chrome versi terbaru
+- Mozilla Firefox versi terbaru
+- Microsoft Edge versi terbaru
+
+## Catatan Penting
+
+### Pemeriksaan Menyeluruh
+Sebelum digunakan di lingkungan produksi, lakukan pemeriksaan menyeluruh terhadap seluruh fitur sistem untuk memastikan kompatibilitas dengan kebutuhan Anda.
+
+### Proses Pembayaran
+- Sistem TIDAK memiliki fitur pembayaran otomatis
+- Proses pembayaran dilakukan di luar sistem
+- Konfirmasi dan verifikasi pembayaran dilakukan melalui WhatsApp
+
+### Keamanan
+- Selalu ubah kredensial default setelah instalasi
+- Lakukan backup database secara berkala
+- Update sistem secara berkala untuk keamanan yang lebih baik
+
+## Login Admin Default
+- **Username**: admin
+- **Password**: admin123
+
+*Harap segera ganti password default setelah login pertama kali*
+
+## Lisensi
+Proyek ini dilisensikan di bawah [MIT License](LICENSE).
+
+## Dukungan
+Untuk bantuan lebih lanjut, silakan hubungi tim pengembang.
 
 ## Penggunaan
 1. **Halaman Depan**

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 10, 2026 at 11:32 AM
+-- Generation Time: Jan 11, 2026 at 02:00 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -43,7 +43,7 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`id`, `username`, `password`, `fullname`, `email`, `phone`, `created_at`, `updated_at`) VALUES
-(1, 'admin', '$2y$10$NIxx8333nO89egqz.kUPN.Up5ciWrZbQaWj4HkRT5IqY/cyssaR6S', 'Administrator', 'admin@travelwisata.com', '081234567890', '2026-01-09 15:33:26', '2026-01-09 15:38:13');
+(1, 'admin', '$2y$10$d7XxJqrPX6pM/wlvkP1ss.AhnhY4YiVTkbnn2BSTV8u35CV65bvfa', 'Administrator', 'admin@travelwisata.com', '081234567890', '2026-01-09 15:33:26', '2026-01-10 10:33:49');
 
 -- --------------------------------------------------------
 
@@ -68,15 +68,12 @@ CREATE TABLE `armada` (
 --
 
 INSERT INTO `armada` (`id`, `nama`, `nomor_polisi`, `jenis`, `kapasitas`, `deskripsi`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Toyota Hiace', 'B 5678 EF', 'Mikro Bus', 12, 'AC, Reclining Seats, Bantal & Selimut', 'dipesan', '2026-01-07 17:11:13', '2026-01-08 16:02:08'),
-(2, 'Isuzu Elf', 'B 3099 TB', 'Innova', 18, 'AC, Reclining Seats, TV, Charger', 'tersedia', '2026-01-07 17:11:13', '2026-01-09 13:26:28'),
-(3, 'Toyota Hiace Premium', 'B 3040 TB', 'Mikro Bus', 10, 'AC, Reclining Seats, Bantal & Selimut, TV, Charger', 'dipesan', '2026-01-07 17:11:13', '2026-01-08 16:02:08'),
-(4, 'Mercedes-Benz Sprinter', 'B 7890 GH', 'Big Bus', 30, 'AC, Reclining Seats, TV, Toilet, Charger', 'dipesan', '2026-01-07 17:11:13', '2026-01-08 16:02:08'),
-(5, 'Toyota Hiace', 'B 5678 EF', 'Minibus', 12, 'AC, Musik, Nyaman', 'dipesan', '2026-01-08 15:52:07', '2026-01-09 14:48:35'),
-(6, 'Daihatsu Grand Max', 'B 1234 AB', 'Elf', 8, 'AC, Ekonomis', 'dipesan', '2026-01-08 15:52:07', '2026-01-09 14:46:31'),
-(7, 'Isuzu Elf', 'B 2345 BC', 'Bus Kecil', 16, 'AC, Toilet, TV', 'tersedia', '2026-01-08 15:52:07', '2026-01-08 16:02:08'),
-(8, 'Toyota Avanza', 'B 4567 DE', 'MPV', 6, 'AC, Nyaman untuk perjalanan dekat', 'tersedia', '2026-01-08 15:52:07', '2026-01-08 16:02:08'),
-(9, 'Mitsubishi L300', 'B 3456 CD', 'Minibus', 10, 'Ekonomis, Cocok untuk rombongan', 'tersedia', '2026-01-08 15:52:07', '2026-01-08 16:02:08');
+(12, 'Hiece', 'B 3080 TB', '', 16, 'ASas', 'tersedia', '2026-01-11 07:35:54', '2026-01-11 07:38:02'),
+(13, 'Hiece', 'B 1234 AB', '', 12, '', 'dipesan', '2026-01-11 07:38:44', '2026-01-11 11:55:28'),
+(14, 'Hiece', 'B 1234 ABC', '', 14, '', 'tersedia', '2026-01-11 07:39:45', '2026-01-11 07:39:45'),
+(15, 'Hiece', 'B 5678 DEF', '', 12, '', 'tersedia', '2026-01-11 07:40:01', '2026-01-11 07:40:01'),
+(16, 'Apv', 'D 9012 GHI', '', 7, '', 'tersedia', '2026-01-11 07:40:47', '2026-01-11 07:40:47'),
+(18, 'sigra', 'B 1123 KLM', '', 6, '', 'tersedia', '2026-01-11 07:41:57', '2026-01-11 07:41:57');
 
 -- --------------------------------------------------------
 
@@ -97,22 +94,38 @@ CREATE TABLE `booking` (
   `status` enum('menunggu','dikonfirmasi','ditolak','selesai') DEFAULT 'menunggu',
   `catatan` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `jenis_booking` enum('wisata','dropan') NOT NULL DEFAULT 'wisata',
+  `id_jadwal_dropan` int(11) DEFAULT NULL,
+  `jumlah_penumpang` int(11) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `booking`
 --
 
-INSERT INTO `booking` (`id`, `kode_booking`, `nama_pemesan`, `no_wa`, `id_paket`, `id_armada`, `id_supir`, `tanggal_berangkat`, `total_harga`, `status`, `catatan`, `created_at`, `updated_at`) VALUES
-(4, 'BOOK202601085CDB6B', 'ahlan boys', '23423423423', 5, 2, NULL, '2026-01-09', 4000000.00, 'menunggu', '', '2026-01-08 12:31:33', '2026-01-08 12:31:33'),
-(5, 'BOOK2026010824BA26', 'ahlan boys', '23423423423', 5, 4, NULL, '2026-01-09', 4000000.00, 'ditolak', '', '2026-01-08 12:31:46', '2026-01-08 15:34:21'),
-(6, 'BOOK2026010812FCFB', 'John Doe', '23423423423', 1, 1, NULL, '2026-01-10', 2500000.00, 'selesai', '', '2026-01-08 12:47:13', '2026-01-10 05:17:30'),
-(7, 'BOOK20260108DD8FF3', 'ahlan boys', '23423423423', 1, 3, NULL, '2026-01-09', 2500000.00, 'menunggu', '', '2026-01-08 13:14:53', '2026-01-10 05:17:17'),
-(9, 'BOOK2026010989DE2D', 'ahlan boyssdaaaaaaaa', '2344534345', 2, NULL, NULL, '2026-01-10', 2000000.00, 'menunggu', 'ASasAS', '2026-01-08 17:11:52', '2026-01-10 05:17:17'),
-(10, 'BOOK202601092915A9', 'asd', '81234567890', 1, 6, NULL, '2026-01-23', 2500000.00, 'dikonfirmasi', 'asdasd', '2026-01-08 17:14:10', '2026-01-09 11:41:24'),
-(11, 'TRV-696114C76D5D4', 'Asep Muhammad Ahlan Selan', '23423423423', 1, 6, NULL, '2026-01-09', 2500000.00, 'dikonfirmasi', '', '2026-01-09 14:46:31', '2026-01-10 10:30:43'),
-(12, 'TRV-6961154305ABA', 'ahlan boys', '81234567890', 1, 5, NULL, '2026-01-24', 2500000.00, 'dikonfirmasi', '', '2026-01-09 14:48:35', '2026-01-10 10:25:38');
+INSERT INTO `booking` (`id`, `kode_booking`, `nama_pemesan`, `no_wa`, `id_paket`, `id_armada`, `id_supir`, `tanggal_berangkat`, `total_harga`, `status`, `catatan`, `created_at`, `updated_at`, `jenis_booking`, `id_jadwal_dropan`, `jumlah_penumpang`) VALUES
+(14, 'TRV-69638FB0D699D', 'ahlan boys', '23423423423', 8, 13, NULL, '2026-01-13', 1750000.00, 'menunggu', '', '2026-01-11 11:55:28', '2026-01-11 11:55:28', 'wisata', NULL, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `jadwal_dropan`
+--
+
+CREATE TABLE `jadwal_dropan` (
+  `id` int(11) NOT NULL,
+  `id_rute` int(11) NOT NULL,
+  `tanggal` date NOT NULL,
+  `jam_berangkat` time NOT NULL,
+  `id_armada` int(11) NOT NULL,
+  `harga_per_orang` decimal(12,2) NOT NULL,
+  `total_kursi` int(11) NOT NULL,
+  `kursi_terisi` int(11) DEFAULT 0,
+  `status` enum('aktif','penuh','selesai') DEFAULT 'aktif',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -137,11 +150,9 @@ CREATE TABLE `paket` (
 --
 
 INSERT INTO `paket` (`id`, `nama_paket`, `id_rute`, `jenis_layanan`, `harga`, `deskripsi`, `created_at`, `updated_at`, `status`) VALUES
-(1, 'Jakarta - Bandung All In', 1, 'all_in', 2500000.00, 'Termasuk bbm, tol, supir, makan siang, dan parkir', '2026-01-07 17:11:13', '2026-01-07 17:11:13', 'aktif'),
-(2, 'Jakarta - Bandung Non All In', 1, 'non_all_in', 2000000.00, 'Harga hanya untuk sewa kendaraan dan supir', '2026-01-07 17:11:13', '2026-01-07 17:11:13', 'aktif'),
-(3, 'Jakarta - Yogyakarta All In', 2, 'all_in', 4500000.00, 'Termasuk bbm, tol, supir, makan siang, makan malam, dan parkir', '2026-01-07 17:11:13', '2026-01-07 17:11:13', 'aktif'),
-(4, 'Jakarta - Surabaya All In', 3, 'all_in', 6500000.00, 'Termasuk bbm, tol, supir, makan siang, makan malam, dan parkir', '2026-01-07 17:11:13', '2026-01-07 17:11:13', 'aktif'),
-(5, 'Bandung - Yogyakarta All In', 4, 'all_in', 4000000.00, 'Termasuk bbm, tol, supir, makan siang, dan parkir', '2026-01-07 17:11:13', '2026-01-08 16:21:03', 'aktif');
+(8, 'Tasikmlaya - Bandung', 4, 'all_in', 1750000.00, 'sudah bahan bakar supir diluar tol', '2026-01-11 07:34:23', '2026-01-11 07:34:23', 'aktif'),
+(9, 'Tasikmlaya - Jakarta', 5, 'all_in', 1700000.00, 'drop bandung 1,5\r\n2.500,000 diluar tol\r\nklo pp \r\n3.500,000', '2026-01-11 07:43:06', '2026-01-11 07:43:06', 'aktif'),
+(10, 'Tasikmlaya - Jawa Timur', 7, 'all_in', 1600000.00, 'ke jawa timur di hitung 3 hari\r\nAll in sudah termasuk supir dan bahan bakar \r\nparkir ,tol dari konsumen\r\n24 jam kebanyakan narik malam\r\nsupir frelance ,yang tetap 2 orang \r\n6 unit travel wisata\r\nHAIC 1', '2026-01-11 07:44:40', '2026-01-11 07:44:40', 'aktif');
 
 -- --------------------------------------------------------
 
@@ -168,12 +179,9 @@ CREATE TABLE `rute` (
 --
 
 INSERT INTO `rute` (`id`, `asal`, `tujuan`, `status`, `jarak`, `waktu_tempuh`, `rute_via`, `keterangan`, `durasi_jam`, `created_at`, `updated_at`) VALUES
-(1, 'Jakarta', 'Bandung', 'aktif', 150.50, NULL, NULL, NULL, 3, '2026-01-07 17:11:13', '2026-01-07 17:11:13'),
-(2, 'Jakarta', 'Yogyakarta', 'aktif', 550.00, NULL, NULL, NULL, 10, '2026-01-07 17:11:13', '2026-01-07 17:11:13'),
-(3, 'Jakarta', 'Surabaya', 'aktif', 800.00, NULL, NULL, NULL, 15, '2026-01-07 17:11:13', '2026-01-07 17:11:13'),
-(4, 'Bandung', 'Yogyakarta', 'aktif', 450.00, NULL, NULL, NULL, 8, '2026-01-07 17:11:13', '2026-01-07 17:11:13'),
-(5, 'Bandung', 'Surabaya', 'aktif', 700.00, NULL, 'tol Tasik', NULL, 13, '2026-01-07 17:11:13', '2026-01-09 13:37:23'),
-(6, 'Tasikmalaya', 'Bandung', 'aktif', 700.00, NULL, NULL, NULL, 5, '2026-01-08 15:42:19', '2026-01-08 15:42:19');
+(4, 'Tasikmalaya', 'Bandung', 'aktif', 116.00, NULL, 'Jl. Raya Sumedang - Cibeureum', NULL, 3, '2026-01-07 17:11:13', '2026-01-11 06:57:28'),
+(5, 'Tasikmalaya', 'Jakarta', 'aktif', 263.00, NULL, 'Jl. Tol Purbaleunyi', NULL, 5, '2026-01-07 17:11:13', '2026-01-11 06:57:08'),
+(7, 'Tasikmalaya', 'Jawa Timur', 'aktif', 594.00, NULL, 'Jl. Tol Kertosono - Solo/Jl. Tol Salatiga - Kertosono', NULL, 8, '2026-01-11 06:48:03', '2026-01-11 06:56:40');
 
 -- --------------------------------------------------------
 
@@ -208,6 +216,15 @@ CREATE TABLE `supir` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Dumping data for table `supir`
+--
+
+INSERT INTO `supir` (`id`, `nama_supir`, `no_telepon`, `alamat`, `no_sim`, `id_armada`, `status`, `created_at`, `updated_at`) VALUES
+(5, 'Enjah', '123456789223', '', 'QE32423', NULL, 'tersedia', '2026-01-11 13:39:24', NULL),
+(6, 'Akmal', '234234123124', '', 'QE32424', NULL, 'tersedia', '2026-01-11 13:39:43', NULL),
+(7, 'Asep', '456678234567', '', 'QE32425', NULL, 'tersedia', '2026-01-11 13:40:01', NULL);
+
+--
 -- Indexes for dumped tables
 --
 
@@ -232,7 +249,16 @@ ALTER TABLE `booking`
   ADD UNIQUE KEY `kode_booking` (`kode_booking`),
   ADD KEY `id_paket` (`id_paket`),
   ADD KEY `id_armada` (`id_armada`),
-  ADD KEY `id_supir` (`id_supir`);
+  ADD KEY `id_supir` (`id_supir`),
+  ADD KEY `fk_booking_dropan` (`id_jadwal_dropan`);
+
+--
+-- Indexes for table `jadwal_dropan`
+--
+ALTER TABLE `jadwal_dropan`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_dropan_rute` (`id_rute`),
+  ADD KEY `fk_dropan_armada` (`id_armada`);
 
 --
 -- Indexes for table `paket`
@@ -276,25 +302,31 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `armada`
 --
 ALTER TABLE `armada`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `booking`
 --
 ALTER TABLE `booking`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
+-- AUTO_INCREMENT for table `jadwal_dropan`
+--
+ALTER TABLE `jadwal_dropan`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `paket`
 --
 ALTER TABLE `paket`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `rute`
 --
 ALTER TABLE `rute`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `settings`
@@ -306,7 +338,7 @@ ALTER TABLE `settings`
 -- AUTO_INCREMENT for table `supir`
 --
 ALTER TABLE `supir`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables
@@ -318,7 +350,15 @@ ALTER TABLE `supir`
 ALTER TABLE `booking`
   ADD CONSTRAINT `booking_ibfk_1` FOREIGN KEY (`id_paket`) REFERENCES `paket` (`id`),
   ADD CONSTRAINT `booking_ibfk_2` FOREIGN KEY (`id_armada`) REFERENCES `armada` (`id`),
-  ADD CONSTRAINT `booking_ibfk_supir` FOREIGN KEY (`id_supir`) REFERENCES `supir` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `booking_ibfk_supir` FOREIGN KEY (`id_supir`) REFERENCES `supir` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_booking_dropan` FOREIGN KEY (`id_jadwal_dropan`) REFERENCES `jadwal_dropan` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `jadwal_dropan`
+--
+ALTER TABLE `jadwal_dropan`
+  ADD CONSTRAINT `fk_dropan_armada` FOREIGN KEY (`id_armada`) REFERENCES `armada` (`id`),
+  ADD CONSTRAINT `fk_dropan_rute` FOREIGN KEY (`id_rute`) REFERENCES `rute` (`id`);
 
 --
 -- Constraints for table `paket`
